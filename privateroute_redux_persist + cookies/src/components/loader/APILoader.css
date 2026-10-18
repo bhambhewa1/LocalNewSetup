@@ -1,0 +1,27 @@
+div.loading {
+    margin: 0;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    z-index: 99999999999999999;
+}
+
+.loading {
+    position: relative;
+}
+
+
+/* div.loading {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+.loading {
+    position: relative;
+} */

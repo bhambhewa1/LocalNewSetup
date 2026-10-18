@@ -1,0 +1,12 @@
+.dockerignore
+Dockerfile
+node_modules
+.env.example
+npm-debug.log
+README.md
+.next
+.git
+*.zip
+*.sql
+*.log
+*.tar.gz

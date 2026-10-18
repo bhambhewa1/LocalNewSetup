@@ -1,0 +1,30 @@
+# Use official Node image
+FROM node:18-alpine
+
+ARG NEXT_PUBLIC_FRONTEND_URI
+ARG NEXT_PUBLIC_BACKEND_URI
+ARG NEXT_PUBLIC_BACKEND_MEDIA
+ARG NEXT_PUBLIC_MEDIA_PATHNAME
+
+ENV NEXT_PUBLIC_FRONTEND_URI=$NEXT_PUBLIC_FRONTEND_URI
+ENV NEXT_PUBLIC_BACKEND_URI=$NEXT_PUBLIC_BACKEND_URI
+ENV NEXT_PUBLIC_BACKEND_MEDIA=$NEXT_PUBLIC_BACKEND_MEDIA
+ENV NEXT_PUBLIC_MEDIA_PATHNAME=$NEXT_PUBLIC_MEDIA_PATHNAME
+# Set working directory
+WORKDIR /app
+
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Build the app
+RUN npm run build
+
+# Expose port
+EXPOSE 8080
+
+# Start the app
+CMD ["npm", "run", "start"]

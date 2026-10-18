@@ -1,0 +1,51 @@
+version: 2.1
+
+executors:
+  docker-executor:
+    docker:
+      - image: cimg/node:18.20.4
+
+jobs:
+  build-and-push:
+    docker:
+      - image: cimg/node:18.20.4
+    steps:
+      - checkout
+      - setup_remote_docker
+
+      - add_ssh_keys:
+          fingerprints:
+            - SHA256:tjct7Aj7JE/l8Ycx5FiDNvqKto90OiTPpMkLTRGgeHc
+
+      - run:
+          name: Build Docker image
+          command: docker build --build-arg NEXT_PUBLIC_FRONTEND_URI=$NEXT_PUBLIC_FRONTEND_URI --build-arg NEXT_PUBLIC_BACKEND_URI=$NEXT_PUBLIC_BACKEND_URI --build-arg NEXT_PUBLIC_BACKEND_MEDIA=$NEXT_PUBLIC_BACKEND_MEDIA --build-arg NEXT_PUBLIC_MEDIA_PATHNAME=$NEXT_PUBLIC_MEDIA_PATHNAME -t anirudhchauhan214/real-estate:$CIRCLE_SHA1 .
+
+      - run:
+          name: Login to DockerHub
+          command: echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+
+      - run:
+          name: Push image to DockerHub
+          command: docker push $DOCKERHUB_USERNAME/real-estate:$CIRCLE_SHA1
+
+      - run:
+          name: Deploy to remote server
+          command: |
+            ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP "
+              sudo docker login --username \"$DOCKERHUB_USERNAME\" --password \"$DOCKERHUB_TOKEN\"
+              sudo docker pull $DOCKERHUB_USERNAME/real-estate:$CIRCLE_SHA1
+              sudo docker rm -f real-estate-app || true
+              sudo docker run -d --name real-estate-app -p 8080:8080 $DOCKERHUB_USERNAME/real-estate:$CIRCLE_SHA1
+              sudo docker system prune -af --volumes
+            "
+
+workflows:
+  version: 2.1
+  build:
+    jobs:
+      - build-and-push:
+          filters:
+            branches:
+              only:
+                - develop
